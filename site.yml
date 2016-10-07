@@ -1,0 +1,11 @@
+# This playbook installs the prereq for a ose installation
+
+- hosts: ose-servers-all
+  remote_user: root
+#  vars:
+#    favcolor: blue
+  vars_files:
+    - vars/vars.yml
+    - vars/secrets.yml  
+  roles:
+    - ose-prereq
