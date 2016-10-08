@@ -1,6 +1,7 @@
 # This playbook installs the prereq for a ose installation
 
-- hosts: ose-servers-all
+#- hosts: ose-servers-all
+- hosts: ose-servers-all-registry
   remote_user: root
 #  vars:
 #    favcolor: blue

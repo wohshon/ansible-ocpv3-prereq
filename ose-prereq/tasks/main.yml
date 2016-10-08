@@ -32,7 +32,9 @@
   with_items:
     - "subscription-manager register --username={{ RHNID }} --password={{ RHNPASS }}"
     - "subscription-manager attach --pool={{ RHNPOOL}}"
-
+  tags:
+    - rhn-sub
+    
 - name: Disable and Enable Repos
   command: "{{ item }}"
   with_items:
