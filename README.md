@@ -14,10 +14,13 @@ Installation of standalone registry will be done separately
  - The password for the vault is maintained in another file which you have to provide
  - To run the playbook
 
-	~~ansible-playbook -i hosts-prereq site.yml --skip-tags "unsub" --vault-password-file ~/osev3/pw.txt
-
+	```
+	ansible-playbook -i hosts-prereq site.yml --skip-tags "unsub" --vault-password-file ~/osev3/pw.txt
+	```
  - To retry the playbook, need to unregister the system first or you can skip the registration task
 
- 	~~ansible-playbook -i hosts-prereq site.yml --tags "unsub" --vault-password-file ~/osev3/pw.txt
+ 	```
+ 	ansible-playbook -i hosts-prereq site.yml --tags "unsub" --vault-password-file ~/osev3/pw.txt
 
- 	~~ansible-playbook -i hosts-prereq site.yml --skip-tags "rhn-sub" --vault-password-file ~/osev3/pw.txt
+	ansible-playbook -i hosts-prereq site.yml --skip-tags "rhn-sub" --vault-password-file ~/osev3/pw.txt
+ 	```
