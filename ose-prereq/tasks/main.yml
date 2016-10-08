@@ -34,14 +34,12 @@
     - "subscription-manager attach --pool={{ RHNPOOL}}"
   tags:
     - rhn-sub
-    
+
 - name: Disable and Enable Repos
   command: "{{ item }}"
   with_items:
     - "subscription-manager repos --disable='*'"
     - "subscription-manager repos --enable='rhel-7-server-rpms' --enable='rhel-7-server-extras-rpms' --enable='rhel-7-server-ose-3.3-rpms' --enable='rhel-7-server-optional-rpms'"
- #   - "yum repolist"
-
 
 # FOR RETRY
 - name: unsubscribe
@@ -49,25 +47,6 @@
   tags: 
     - unsub
 
-# - name: Install NetworkManager 
-#   command: "yum -y install NetworkManager*"
-
-
-# - name: Install utilities packages for Master
-#   command: yum -y install wget git net-tools bind-utils iptables-services bridge-utils bash-completion
-#   when: inventory_hostname in groups['ose-servers-master']
-
-# - name: Install Docker 1.10.3
-#   command: yum install docker-1.10.3 -y
-
-# - name: Update all
-#   command: "{{ item }}"
-#   with_items:
-#     - "yum install -y yum-versionlock"
-#     - "yum versionlock docker"
-#     - "yum update -y"
-
-#NOT TESTED
 - name: Install NetworkManager 
   yum: name=NetworkManager* state=present
 
@@ -98,15 +77,11 @@
 - name: update all
   yum:  state=latest name=*
 
-# yum module end    
-
 - name: Configure docker configuration
   command: "{{ item }}"
   with_items:
     - "cp /etc/sysconfig/docker /etc/sysconfig/docker.original"
     - "sed -i 's/--selinux-enabled/--selinux-enabled --insecure-registry 172.30.0.0\\/0/' /etc/sysconfig/docker"
- # not needed
- #   - "cat /etc/sysconfig/docker | grep 172.30"
 
 - name: Generate SSH keys on Master
   shell: ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
