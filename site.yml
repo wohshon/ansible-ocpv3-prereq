@@ -1,12 +1,11 @@
-# This playbook installs the prereq for a ose installation
+# file: site.yml
+#  ansible-playbook -v -i hosts-prereq site.yml --skip-tags "unsub" --vault-password-file ~/osev3/pw.txt 
 
 #- hosts: ose-servers-all
 - hosts: ose-servers-all-registry
   remote_user: root
-#  vars:
-#    favcolor: blue
   vars_files:
     - vars/vars.yml
     - vars/secrets.yml  
   roles:
-    - ose-prereq
+    - vm-prereq-role
