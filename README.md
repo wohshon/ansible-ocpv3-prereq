@@ -5,7 +5,7 @@ It covers all the steps from RHN registration till public key distribution from 
 
 Installation will be done separately, it will be integrated to this playbook at a later date  
 (Installation playbook will be run from the master node)
-Installation of standalone registry will be done separately
+
 
 ## Environment
 
