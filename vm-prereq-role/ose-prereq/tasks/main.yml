@@ -1,0 +1,125 @@
+---
+# - name: Test Connection
+#   ping: 
+
+# - name: Test Variable
+#   debug:  
+#     msg: "{{ msg }}"
+
+# - name: Test register
+#   shell: /bin/echo "hello123"
+#   register: mymsg
+
+# - name: Test backslash
+#   shell: "/bin/echo 'hello\\123'"
+#   register: mymsg
+
+# - name: Test Variable
+#   debug:  
+#     msg: "{{ mymsg.stdout }}"
+
+
+# - name: test when
+#   debug:
+#     msg: 'hello hello'
+#   when: inventory_hostname in groups['ose-servers-master']
+
+# STARTS HERE
+
+- name: Subscription to RHN and attach Pool
+  command: "{{ item }}"
+  no_log: true
+  with_items:
+    - "subscription-manager register --username={{ RHNID }} --password={{ RHNPASS }}"
+    - "subscription-manager attach --pool={{ RHNPOOL}}"
+  tags:
+    - rhn-sub
+
+- name: Disable and Enable Repos
+  command: "{{ item }}"
+  with_items:
+    - "subscription-manager repos --disable='*'"
+    - "subscription-manager repos --enable='rhel-7-server-rpms' --enable='rhel-7-server-extras-rpms' --enable='rhel-7-server-ose-3.3-rpms' --enable='rhel-7-server-optional-rpms'"
+
+# FOR RETRY
+- name: unsubscribe
+  command: "subscription-manager unregister"
+  tags: 
+    - unsub
+
+- name: Install NetworkManager 
+  yum: name=NetworkManager* state=present
+
+- name: Install utilities packages for Master
+  yum:  state=present name={{ item }}
+  with_items:
+    - wget
+    - git
+    - net-tools
+    - bind-utils
+    - iptables-services
+    - bridge-utils
+    - bash-completion
+  when: inventory_hostname in groups['ose-servers-master']
+
+- name: Install Docker 1.10.3
+  yum: state=present name=docker-1.10.3
+
+- name: Install Version Lock
+  yum:  state=present name={{ item }}
+  with_items:
+    - yum-versionlock
+#    - versionlock docker
+
+- name: lock docker version
+  command: "yum versionlock docker"
+
+
+- name: update all
+  yum:  state=latest name=*
+
+- name: Configure docker configuration
+  command: "{{ item }}"
+  with_items:
+    - "cp /etc/sysconfig/docker /etc/sysconfig/docker.original"
+    - "sed -i 's/--selinux-enabled/--selinux-enabled --insecure-registry 172.30.0.0\\/0/' /etc/sysconfig/docker"
+
+- name: Generate SSH keys on Master
+  shell: ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+  args:
+    creates: /root/.ssh/id_rsa
+  when: inventory_hostname in groups['ose-servers-master']
+
+- name: Collect key from master node
+  shell: cat ~/.ssh/id_rsa.pub
+  register: ssh_keys
+  when: inventory_hostname in groups['ose-servers-master']
+  tags:
+    - deploy-keys
+
+- name: save key to local file
+  local_action: copy content={{ ssh_keys.stdout }} dest={{ pubkey }}
+  when: inventory_hostname in groups['ose-servers-master']
+  tags:
+    - deploy-keys
+
+
+- name: Check keys
+  debug: 
+    msg: "{{ ssh_keys }}"
+  tags:
+    - deploy-keys
+
+- name: Deploy keys on all servers
+  authorized_key: user=root key="{{ lookup('file', '{{ pubkey }}') }}"
+  tags:
+    - deploy-keys
+
+- name: create docker mount path on Master (or infra)
+  file: path=/mnt/registry state=directory mode=0777
+
+- name: install atomic-openshift-utils on Master
+  yum: state=present name=atomic-openshift-utils
+  when: inventory_hostname in groups['ose-servers-master']
+  tags:
+    - install-utils

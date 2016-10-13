@@ -60,6 +60,7 @@
     - iptables-services
     - bridge-utils
     - bash-completion
+  when: inventory_hostname in groups['ose-servers-master']
 
 - name: Install Docker 1.10.3
   yum: state=present name=docker-1.10.3
@@ -116,3 +117,9 @@
 
 - name: create docker mount path on Master (or infra)
   file: path=/mnt/registry state=directory mode=0777
+
+- name: install atomic-openshift-utils on Master
+  yum: state=present name=atomic-openshift-utils
+  when: inventory_hostname in groups['ose-servers-master']
+  tags:
+    - install-utils
