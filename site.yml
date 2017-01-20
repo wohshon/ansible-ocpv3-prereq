@@ -2,7 +2,7 @@
 #  ansible-playbook -v -i hosts-prereq site.yml --skip-tags "unsub" --vault-password-file ~/osev3/pw.txt 
 
 #- hosts: ose-servers-all
-- hosts: ose-servers-all-registry
+- hosts: ose-servers-all
   remote_user: root
   vars_files:
     - vars/vars.yml
