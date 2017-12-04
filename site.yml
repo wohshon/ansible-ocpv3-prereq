@@ -1,11 +1,31 @@
-# file: site.yml
-#  ansible-playbook -v -i hosts-prereq site.yml --skip-tags "unsub" --vault-password-file ~/osev3/pw.txt 
+---
+# This playbook setup a cluster.
 
-#- hosts: ose-servers-all
-- hosts: ose-servers-all-registry
-  remote_user: root
-  vars_files:
-    - vars/vars.yml
-    - vars/secrets.yml  
+- name: create instances on aws
+  remote_user: ec2-user
+  hosts: aws
   roles:
-    - vm-prereq-role
+    - common
+
+- name: install prereq
+  remote_user: ec2-user
+  become: true
+  vars_files:
+    - vars/secrets.yml 
+  hosts:
+  - masters
+  - nodes
+  roles:
+    - prereq
+
+
+#- name: install keys
+#  remote_user: ec2-user
+#  become: true
+#  hosts:
+#  - masters-private
+#  - nodes-private
+#  roles:
+#    - keys
+
+
